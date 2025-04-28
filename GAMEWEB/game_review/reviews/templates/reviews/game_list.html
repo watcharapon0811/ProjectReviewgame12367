@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>รีวิวเกม</title>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Cinzel', serif;
+      background: linear-gradient(to right, #1a1a2e, #154d91);
+      color: #eaeaea;
+      overflow-x: hidden;
+    }
+
+    header {
+      padding: 20px 0;
+      text-align: right;
+      background: rgba(0, 0, 0, 0.7);
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 1000;
+      transition: top 0.4s ease;
+    }
+
+    nav a {
+      margin: 0 15px;
+      color: #d3d3d3;
+      text-decoration: none;
+      font-size: 1.2em;
+      transition: 0.3s;
+    }
+
+    nav a:hover {
+      color: #4d3e05;
+    }
+
+    .hero {
+      margin-top: 100px;
+      height: 60vh;
+      background: url('') center/cover no-repeat;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      position: relative;
+    }
+
+    .hero::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+    }
+
+    .hero h2 {
+      position: relative;
+      font-size: 3em;
+      color: #c2ba9c;
+      z-index: 1;
+    }
+
+    /* Loader */
+    #loader {
+      position: fixed;
+      z-index: 2000;
+      background: rgba(0, 0, 0, 0.9);
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      display: none;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .spinner {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid;
+      border-image: linear-gradient(45deg, #3498db, #00f2fe) 1;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 0.5s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Carousel */
+    .carousel-container {
+      position: relative;
+      overflow: hidden;
+      padding: 50px 40px;
+    }
+
+    .carousel {
+      display: flex;
+      overflow-x: auto;
+      scroll-behavior: smooth;
+      white-space: nowrap;
+      gap: 20px;
+      padding: 20px 0;
+    }
+
+    .carousel::-webkit-scrollbar {
+      display: none;
+    }
+
+    .carousel-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 10;
+      background: rgba(0, 0, 0, 0.5);
+      color: white;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      padding: 10px;
+      border-radius: 50%;
+    }
+
+    .carousel-btn.left {
+      left: 10px;
+    }
+
+    .carousel-btn.right {
+      right: 10px;
+    }
+
+    /* Fade effect */
+    .carousel-container::before,
+    .carousel-container::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      width: 80px;
+      height: 100%;
+      z-index: 5;
+      pointer-events: none;
+    }
+
+    .carousel-container::before {
+      left: 0;
+      background: linear-gradient(to right, rgba(0,0,0,0.7), transparent);
+    }
+
+    .carousel-container::after {
+      right: 0;
+      background: linear-gradient(to left, rgba(0,0,0,0.7), transparent);
+    }
+
+    /* Game Card */
+    .game-card {
+      display: inline-block;
+      min-width: 250px;
+      background: #e3e3e4;
+      border: 2px solid #466ab9;
+      border-radius: 15px;
+      overflow: hidden;
+      box-shadow: 0 0 15px rgba(175, 167, 133, 0.5);
+      text-decoration: none;
+      color: inherit;
+      flex-shrink: 0;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .game-card:hover {
+      transform: scale(1.05);
+    }
+
+    .game-card img {
+      width: 100%;
+      height: 220px;
+      object-fit: cover;
+    }
+
+    .game-card-content {
+      padding: 20px;
+      text-align: center;
+    }
+
+    .game-card-content h3 {
+      color: #000000;
+      margin: 10px 0;
+      font-size: 1.5em;
+    }
+
+  </style>
+
+</head>
+
+<body>
+
+<header id="header">
+  <nav>
+    <a href="{% url 'game_list' %}">Home</a>
+    <a href="javascript:void(0);" onclick="goToGameAll()">Review</a>
+  </nav>
+</header>
+
+<!-- Loader -->
+<div id="loader">
+  <div class="spinner"></div>
+</div>
+
+<section class="hero">
+  <h2>Welcom to  Review Game</h2>
+</section>
+
+<section class="carousel-container">
+
+  <button class="carousel-btn left" onclick="scrollCarousel(-300)">&#8592;</button>
+
+  <div class="carousel">
+    {% for game in games %}
+      <div class="game-card">
+        <img src="{{ game.poster.url }}" alt="{{ game.title }}">
+        <div class="game-card-content">
+          <h3>{{ game.title }}</h3>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+
+  <button class="carousel-btn right" onclick="scrollCarousel(300)">&#8594;</button>
+
+</section>
+
+<script>
+  let lastScrollTop = 0;
+  const header = document.getElementById('header');
+
+  window.addEventListener('scroll', function() {
+    let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    if (scrollTop > lastScrollTop){
+      header.style.top = "-100px";
+    } else {
+      header.style.top = "0";
+    }
+    lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
+  });
+
+  function goToGameAll() {
+    document.getElementById('loader').style.display = 'flex';
+    setTimeout(function() {
+      window.location.href = "{% url 'review_game' %}";
+    }, 1000);
+  }
+
+  function scrollCarousel(amount) {
+  const carousel = document.querySelector('.carousel');
+  carousel.scrollBy({ left: amount, behavior: 'smooth' });
+}
+
+// ✅ Auto Scroll แบบ "เด้งไป-มา"
+const carousel = document.querySelector('.carousel');
+let direction = 1; // 1 = ขวา, -1 = ซ้าย
+let scrollSpeed = 2; // ความเร็วเลื่อน (ตัวใหญ่เร็วขึ้น)
+
+let autoScrollInterval = setInterval(() => {
+  if (carousel.scrollWidth > carousel.clientWidth) {
+    carousel.scrollBy({ left: scrollSpeed * direction, behavior: 'smooth' });
+
+    // ถ้าไปสุดขวา → เปลี่ยนทางไปซ้าย
+    if (carousel.scrollLeft + carousel.clientWidth >= carousel.scrollWidth - 1) {
+      direction = -1;
+    }
+    // ถ้าไปสุดซ้าย → เปลี่ยนทางไปขวา
+    if (carousel.scrollLeft <= 0) {
+      direction = 1;
+    }
+  }
+}, 30); // 
+
+</script>
+
+</body>
+</html>
